@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>세과영 학점 계산기</title>
+<title>세과영 학점 계산기 by. 하흔</title>
 
 <!-- Google Fonts: Pretendard 대체용 + 디스플레이 폰트 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -527,6 +527,82 @@ header.topbar {
 .study-urgency.mid  { background: rgba(255, 159, 28, 0.14); color: var(--warn); }
 .study-urgency.low  { background: rgba(43, 182, 115, 0.14); color: var(--success); }
 .study-empty { font-size: 12px; color: var(--ink-mute); text-align: center; padding: 20px; }
+
+/* 기말 노력 시뮬레이터 */
+.effort-sim-card { padding: 20px 22px; }
+.effort-sim-intro {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.effort-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.effort-item {
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.effort-item:hover { transform: translateY(-2px); box-shadow: var(--glass-shadow-hover); }
+.effort-item.top {
+  background: linear-gradient(160deg, rgba(79,107,255,0.1), rgba(46,196,182,0.08)), var(--glass-bg);
+  border-color: rgba(79,107,255,0.3);
+}
+.effort-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.effort-label { font-weight: 700; font-size: 14px; }
+.effort-delta-tag {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+  background: var(--glass-border);
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+.effort-gpa {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--accent);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.effort-gpa .effort-max {
+  font-size: 11px;
+  color: var(--ink-mute);
+  font-weight: 500;
+  margin-left: 2px;
+}
+.effort-bar {
+  height: 5px;
+  background: var(--glass-border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 8px 0 6px;
+}
+.effort-bar > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-3));
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.effort-diff { font-size: 11px; font-weight: 600; color: var(--ink-mute); font-variant-numeric: tabular-nums; }
+.effort-diff.up { color: var(--success); }
+.effort-diff.down { color: var(--danger); }
+.effort-sim-note { font-size: 11px; color: var(--ink-mute); margin-top: 12px; line-height: 1.5; }
+@media (max-width: 700px) {
+  .effort-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* 난이도 예측 카드 */
 .exam-forecast-card {
@@ -1234,8 +1310,8 @@ table.elements input[readonly]:focus {
     <div class="brand">
       <div class="brand-mark">G</div>
       <div class="brand-text">
-        <h1>세과영</h1>
-        <p>학점 계산기 by 하흔</p>
+        <h1>세과영 학점 계산기</h1>
+        <p>by. 하흔</p>
       </div>
     </div>
     <div class="topbar-actions">
@@ -1361,6 +1437,15 @@ table.elements input[readonly]:focus {
       </div>
     </div>
     <div class="glass study-order-card" id="study-order"></div>
+  </section>
+
+  <!-- ============ 기말 노력 가상 시뮬레이터 ============ -->
+  <section class="group-section">
+    <div class="section-title">
+      <h2>🎮 기말 노력 시뮬레이터</h2>
+      <span class="hint">노력 정도별 예상 전체 평점</span>
+    </div>
+    <div class="glass effort-sim-card" id="effort-sim"></div>
   </section>
 
   <!-- ============ 컨트롤 ============ -->
@@ -1830,8 +1915,18 @@ const DIFFICULTY_LABEL = {
   harder: "어려워짐", much_harder: "매우 어려워짐",
 };
 
-/* 중간고사 점수 + 난이도로 기말고사 예상 득점률/점수 추정 */
-function computeExamForecast(course) {
+/* 기말 노력 수준 → 득점률 보정 (난이도와 별개로 가산) */
+const EFFORT_DELTA = {
+  highest: +0.10, high: +0.05, mid: 0.00, low: -0.05, lowest: -0.10,
+};
+const EFFORT_LABEL = {
+  highest: "최상", high: "상", mid: "중", low: "하", lowest: "최하",
+};
+const EFFORT_ORDER = ["highest", "high", "mid", "low", "lowest"];
+
+/* 중간고사 점수 + 난이도 + 노력 수준으로 기말고사 예상 득점률/점수 추정
+   effortOverride: 전역 시뮬레이션에서 모든 과목에 일괄 노력 적용 시 사용 */
+function computeExamForecast(course, effortOverride) {
   const mid = course.elements.find(e => e.isExam && e.name === "중간고사");
   const fin = course.elements.find(e => e.isExam && e.name === "기말고사");
   if (!fin) return null; // 기말이 없으면 예측 대상 아님
@@ -1843,7 +1938,12 @@ function computeExamForecast(course) {
   const hasMidExam = !!mid; // 중간고사 항목 자체가 존재하는지
 
   const diff = course.examDifficulty || "similar";
-  const delta = DIFFICULTY_DELTA[diff] ?? 0;
+  const diffDelta = DIFFICULTY_DELTA[diff] ?? 0;
+  // 노력 수준: 전역 오버라이드 > 과목별 > 기본(중)
+  const effort = effortOverride || course.examEffort || "mid";
+  const effortDelta = EFFORT_DELTA[effort] ?? 0;
+  const delta = diffDelta + effortDelta; // 난이도 + 노력 합산 보정
+  const effortTxt = effortDelta !== 0 ? ` + 노력 ${EFFORT_LABEL[effort]}` : "";
 
   // 영역 평균을 직접 계산 (computeCourse 호출 금지 — 순환 방지)
   let perfFM = 0, perfFS = 0;
@@ -1858,15 +1958,15 @@ function computeExamForecast(course) {
   let basisText = "";
 
   if (hasMidExam) {
-    // ── 중간고사가 있는 과목: 중간 점수 + 난이도 ──
+    // ── 중간고사가 있는 과목: 중간 점수 + 난이도 + 노력 ──
     const midPct = (midHas && midMark > 0) ? Number(mid.score) / midMark : null;
     if (midPct !== null) {
       predictedFinalPct = Math.max(0, Math.min(1, midPct + delta));
-      basisText = `중간 ${(midPct*100).toFixed(0)}% + 난이도 ${DIFFICULTY_LABEL[diff]}`;
+      basisText = `중간 ${(midPct*100).toFixed(0)}% + 난이도 ${DIFFICULTY_LABEL[diff]}${effortTxt}`;
     }
     return {
       mode: "mid", hasMidExam, midMark, finMark, midHas, finHas,
-      midPct, diff, delta, predictedFinalPct,
+      midPct, diff, delta, effort, effortDelta, predictedFinalPct,
       predictedFinalScore: predictedFinalPct !== null ? round2(predictedFinalPct * finMark) : null,
       active: midHas && !finHas, basisText,
     };
@@ -1876,13 +1976,13 @@ function computeExamForecast(course) {
   const fMode = course.examForecastMode || "perf"; // "perf" | "difficulty"
 
   if (fMode === "perf") {
-    // 수행 평균 그대로
+    // 수행 평균 + 노력 보정
     if (perfPctLocal !== null) {
-      predictedFinalPct = perfPctLocal;
-      basisText = `수행 평균 ${(perfPctLocal*100).toFixed(0)}%`;
+      predictedFinalPct = Math.max(0, Math.min(1, perfPctLocal + effortDelta));
+      basisText = `수행 평균 ${(perfPctLocal*100).toFixed(0)}%${effortTxt}`;
     }
   } else {
-    // 난이도 기준: 기준선 선택
+    // 난이도 기준: 기준선 선택 + 난이도 + 노력
     const baseline = course.forecastBaseline || "perf"; // "perf" | "manual" | "global"
     let basePct = null;
     if (baseline === "perf") {
@@ -1898,14 +1998,14 @@ function computeExamForecast(course) {
     }
     if (basePct !== null) {
       predictedFinalPct = Math.max(0, Math.min(1, basePct + delta));
-      basisText += ` + 난이도 ${DIFFICULTY_LABEL[diff]}`;
+      basisText += ` + 난이도 ${DIFFICULTY_LABEL[diff]}${effortTxt}`;
     }
   }
 
   return {
     mode: "finonly", forecastMode: fMode, baseline: course.forecastBaseline || "perf",
     hasMidExam: false, midMark: 0, finMark, midHas: false, finHas,
-    diff, delta, predictedFinalPct,
+    diff, delta, effort, effortDelta, predictedFinalPct,
     predictedFinalScore: predictedFinalPct !== null ? round2(predictedFinalPct * finMark) : null,
     active: !finHas, basisText,
     manualPct: course.forecastManualPct,
@@ -1983,6 +2083,20 @@ function computeOverall() {
     usedCourses,
     hasAnyScore: sumWGPAw > 0,
   };
+}
+
+/* 전역 기말 노력 시뮬레이션: 모든 미입력 기말에 effort를 일괄 적용했을 때 전체 예상 평점.
+   각 과목의 examEffort를 임시로 덮어쓰고 computeCourse를 돌린 뒤 복원한다. */
+function simulateOverallWithEffort(effort) {
+  const backup = [];
+  for (const c of state.courses) {
+    backup.push({ c, effort: c.examEffort, fill: c.fillEmpty });
+    c.examEffort = effort;
+    c.fillEmpty = true; // 시뮬레이션은 "이대로 가면" 기준이라 빈칸 평균채움
+  }
+  const o = computeOverall();
+  for (const b of backup) { b.c.examEffort = b.effort; b.c.fillEmpty = b.fill; }
+  return o.overall;
 }
 
 /* -------- 과목군별 평균 (점수 기준) -------- */
@@ -2082,8 +2196,67 @@ function render() {
   renderSummary();
   renderGroups();
   renderStudyOrder();
+  renderEffortSim();
   renderGroupFilter();
   renderCourses();
+}
+
+/* ── 기말 노력 시뮬레이터 ──
+   5단계 노력(최상~최하)을 모든 미입력 기말에 일괄 적용했을 때 전체 예상 평점을 비교.
+   현재 실제 예상 평점(과목별 설정 반영)도 기준선으로 표시. */
+function renderEffortSim() {
+  const root = $("#effort-sim");
+  if (!root) return;
+
+  // 미입력 기말이 하나라도 있는지
+  const hasOpenFinal = state.courses.some(c => {
+    if (c.pf) return false;
+    const fin = c.elements.find(e => e.isExam && e.name === "기말고사");
+    if (!fin) return false;
+    const has = fin.score !== null && fin.score !== "" && fin.score !== undefined;
+    return !has;
+  });
+
+  if (!hasOpenFinal) {
+    root.innerHTML = `<div class="study-empty">아직 안 본 기말고사가 없습니다. (모든 기말 입력 완료)</div>`;
+    return;
+  }
+
+  // 각 노력 수준별 전체 평점
+  const results = EFFORT_ORDER.map(eff => ({
+    eff, label: EFFORT_LABEL[eff], delta: EFFORT_DELTA[eff],
+    gpa: simulateOverallWithEffort(eff),
+  }));
+  const maxGpa = Math.max(...results.map(r => r.gpa), 0.001);
+  const curGpa = computeOverall().overall;
+
+  root.innerHTML = `
+    <div class="effort-sim-intro">
+      모든 미입력 기말에 같은 노력을 쏟는다고 가정했을 때의 <b>예상 전체 평점</b>입니다.
+      현재(과목별 설정 기준) <b style="color:var(--accent)">${curGpa.toFixed(2)}</b>
+    </div>
+    <div class="effort-grid">
+      ${results.map(r => {
+        const barPct = (r.gpa / 4.3 * 100);
+        const isTop = r.eff === "highest";
+        const deltaTxt = r.delta > 0 ? `+${(r.delta*100)}%p` : r.delta < 0 ? `${(r.delta*100)}%p` : "현재 페이스";
+        const diffFromCur = round2(r.gpa - curGpa);
+        const diffTxt = diffFromCur > 0 ? `+${diffFromCur.toFixed(2)}` : diffFromCur < 0 ? `${diffFromCur.toFixed(2)}` : "±0";
+        const diffCls = diffFromCur > 0 ? "up" : diffFromCur < 0 ? "down" : "";
+        return `
+          <div class="effort-item ${isTop?'top':''}">
+            <div class="effort-head">
+              <span class="effort-label">${r.label}</span>
+              <span class="effort-delta-tag">${deltaTxt}</span>
+            </div>
+            <div class="effort-gpa">${r.gpa.toFixed(2)}<span class="effort-max">/4.3</span></div>
+            <div class="effort-bar"><i style="width:${barPct}%"></i></div>
+            <div class="effort-diff ${diffCls}">현재 대비 ${diffTxt}</div>
+          </div>`;
+      }).join("")}
+    </div>
+    <div class="effort-sim-note">※ 시뮬레이션은 수행평가 빈칸도 현재 평균으로 채워 "이대로 가면" 기준으로 계산합니다. 과목별 세부 노력은 각 과목 카드에서 조정하세요.</div>
+  `;
 }
 
 /* ── 추천 공부 순서: 단위수 × 위험도 ──
@@ -2680,6 +2853,14 @@ function renderCourseBody(c, r) {
     const diffOptions = Object.keys(DIFFICULTY_LABEL).map(k =>
       `<option value="${k}" ${(c.examDifficulty||"similar")===k?"selected":""}>${DIFFICULTY_LABEL[k]}</option>`
     ).join("");
+    const effortOptions = EFFORT_ORDER.map(k =>
+      `<option value="${k}" ${(c.examEffort||"mid")===k?"selected":""}>${EFFORT_LABEL[k]}${EFFORT_DELTA[k]>0?" (+"+(EFFORT_DELTA[k]*100)+"%p)":EFFORT_DELTA[k]<0?" ("+(EFFORT_DELTA[k]*100)+"%p)":""}</option>`
+    ).join("");
+    const effortRow = `
+      <div class="exam-diff-row" style="margin-top:6px">
+        <span style="font-size:12px;color:var(--ink-soft)">기말 노력 정도</span>
+        <select data-act="meta-effort">${effortOptions}</select>
+      </div>`;
 
     // 예측 결과 표시 공통
     const predLine = (ei.predictedFinalScore !== null)
@@ -2712,6 +2893,7 @@ function renderCourseBody(c, r) {
               <span style="font-size:12px;color:var(--ink-soft)">중간 → 기말 난이도 변화</span>
               <select data-act="meta-difficulty">${diffOptions}</select>
             </div>
+            ${effortRow}
             ${body}
           </div>
         </div>`;
@@ -2728,10 +2910,11 @@ function renderCourseBody(c, r) {
       let modeBody = "";
       if (fMode === "perf") {
         modeBody = `
-          <div style="font-size:11px;color:var(--ink-mute);margin:6px 0">현재 수행평가 평균 득점률로 기말을 예상합니다.</div>
+          <div style="font-size:11px;color:var(--ink-mute);margin:6px 0">현재 수행평가 평균 득점률 + 노력 정도로 기말을 예상합니다.</div>
+          ${effortRow}
           ${predLine}`;
       } else {
-        // 난이도 기준: 기준선 선택 + 난이도
+        // 난이도 기준: 기준선 선택 + 난이도 + 노력
         const baselineOptions = `
           <option value="perf" ${baseline==='perf'?'selected':''}>수행평가 평균</option>
           <option value="manual" ${baseline==='manual'?'selected':''}>직접 입력</option>
@@ -2753,6 +2936,7 @@ function renderCourseBody(c, r) {
             <span style="font-size:12px;color:var(--ink-soft)">기준 → 기말 난이도</span>
             <select data-act="meta-difficulty">${diffOptions}</select>
           </div>
+          ${effortRow}
           ${predLine}`;
       }
 
@@ -2986,6 +3170,7 @@ function handleAct(act, target, course, card, opts = {}) {
     case "meta-pfresult": course.pfResult = target.value; break;
     case "meta-target": course.targetGrade = target.value; break;
     case "meta-difficulty": course.examDifficulty = target.value; break;
+    case "meta-effort": course.examEffort = target.value; break;
     case "meta-fmode": course.examForecastMode = target.dataset.val; break;
     case "meta-fbaseline": course.forecastBaseline = target.value; break;
     case "meta-fmanual": {
