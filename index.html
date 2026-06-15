@@ -1513,18 +1513,18 @@ function deepClone(obj) {
 
 /* -------- 기본 등급표 (이상 기준) -------- */
 const DEFAULT_GRADING = [
-  { grade: "A+", cut: 90, gpa: 4.3 },
-  { grade: "A0", cut: 85, gpa: 4.0 },
-  { grade: "A-", cut: 80, gpa: 3.7 },
-  { grade: "B+", cut: 75, gpa: 3.3 },
-  { grade: "B0", cut: 70, gpa: 3.0 },
-  { grade: "B-", cut: 65, gpa: 2.7 },
-  { grade: "C+", cut: 60, gpa: 2.3 },
-  { grade: "C0", cut: 55, gpa: 2.0 },
-  { grade: "C-", cut: 50, gpa: 1.7 },
-  { grade: "D+", cut: 45, gpa: 1.3 },
-  { grade: "D0", cut: 40, gpa: 1.0 },
-  { grade: "F",  cut: 0,  gpa: 0.0 },
+  { grade: "A+", cut: 89.5, gpa: 4.3 },
+  { grade: "A0", cut: 84.5, gpa: 4.0 },
+  { grade: "A-", cut: 79.5, gpa: 3.7 },
+  { grade: "B+", cut: 74.5, gpa: 3.3 },
+  { grade: "B0", cut: 69.5, gpa: 3.0 },
+  { grade: "B-", cut: 64.5, gpa: 2.7 },
+  { grade: "C+", cut: 59.5, gpa: 2.3 },
+  { grade: "C0", cut: 54.5, gpa: 2.0 },
+  { grade: "C-", cut: 49.5, gpa: 1.7 },
+  { grade: "D+", cut: 44.5, gpa: 1.3 },
+  { grade: "D0", cut: 39.5, gpa: 1.0 },
+  { grade: "F",  cut: 0,    gpa: 0.0 },
 ];
 
 /* -------- 기본 과목 데이터 (요구사항대로 고정) -------- */
@@ -1840,6 +1840,19 @@ function computeCourse(course) {
   const examRemain = round2(examMark - examFilledMark);
   const perfRemain = round2(perfMark - perfFilledMark);
 
+  // 중간고사 득점률 (수행 예측 fallback 기준선)
+  const midEl = course.elements.find(e => e.isExam && e.name === "중간고사");
+  let midPctLocal = null;
+  if (midEl) {
+    const mm = Number(midEl.mark) || 0;
+    const mHas = midEl.score !== null && midEl.score !== "" && midEl.score !== undefined && !isNaN(Number(midEl.score));
+    if (mHas && mm > 0) midPctLocal = Number(midEl.score) / mm;
+  }
+  // 수행 빈칸 채우기 비율:
+  //   수행 점수가 하나라도 있으면 → 수행 평균(perfPct)
+  //   수행 점수가 전혀 없으면 → 중간고사 득점률로 예측
+  const perfFillPctLocal = (perfPct !== null) ? perfPct : midPctLocal;
+
   // 난이도 기반 기말 예측 (먼저 계산해서 예상 점수에 반영)
   const examInfo = computeExamForecast(course);
 
@@ -1866,8 +1879,8 @@ function computeCourse(course) {
       // 나머지 시험 빈칸 (기말 제외분)
       const otherExamRemain = round2(Math.max(0, examRemain - (finCounted ? finMark : 0)));
       if (examPct !== null && otherExamRemain > 0) est += otherExamRemain * examPct;
-      // 수행 빈칸
-      if (perfPct !== null && perfRemain > 0) est += perfRemain * perfPct;
+      // 수행 빈칸: 수행 점수 있으면 수행 평균, 없으면 중간고사 득점률로 예측
+      if (perfFillPctLocal !== null && perfRemain > 0) est += perfRemain * perfFillPctLocal;
     }
     expectedScore = round2(est);
   }
@@ -1904,6 +1917,7 @@ function computeCourse(course) {
     perfMark: round2(perfMark), perfFilledMark: round2(perfFilledMark),
     perfFilledScore: round2(perfFilledScore), perfPct, perfRemain, perfFilledCount,
     examInfo, hasFinPredict,
+    midPct: midPctLocal, perfFillPct: perfFillPctLocal,
   };
 }
 
@@ -2352,7 +2366,9 @@ function computeStudyEfficiency(course, examName) {
   // 추천 순서에서는 항상 평균채움 기준으로 다시 계산한다.
   const fallbackPct = (r.currentPct && r.currentPct > 0) ? r.currentPct : null;
   const examFillPct = (r.examPct !== null) ? r.examPct : (r.perfPct !== null ? r.perfPct : fallbackPct);
-  const perfFillPct = (r.perfPct !== null) ? r.perfPct : (r.examPct !== null ? r.examPct : fallbackPct);
+  // 수행 채우기: computeCourse와 동일 규칙(수행 있으면 수행평균, 없으면 중간 득점률), 그것도 없으면 fallback
+  const perfFillPct = (r.perfFillPct !== null && r.perfFillPct !== undefined) ? r.perfFillPct
+                    : (r.examPct !== null ? r.examPct : fallbackPct);
 
   // 예상 점수(평균채움): 확정점수 + 시험 빈칸 평균 + 수행 빈칸 평균
   let expected = r.filledScore;
