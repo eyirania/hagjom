@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>세과영 학점 계산기 by. 하흔</title>
+<title>세과영 학점계산기 · by 하흔</title>
 
 <!-- Google Fonts: Pretendard 대체용 + 디스플레이 폰트 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -601,81 +601,6 @@ header.topbar {
 .effort-diff.down { color: var(--danger); }
 .effort-sim-note { font-size: 11px; color: var(--ink-mute); margin-top: 12px; line-height: 1.5; }
 
-/* 목표 학습 계획 */
-.plan-goal-input {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-.plan-goal-input input {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 18px;
-  width: 62px;
-  border: none;
-  background: transparent;
-  color: var(--accent);
-  border-bottom: 2px solid var(--glass-border);
-  padding: 2px 0;
-  outline: none;
-  text-align: center;
-}
-.plan-goal-input input:focus { border-color: var(--accent); }
-.plan-card { padding: 20px 22px; }
-.plan-summary {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
-}
-.plan-summary-item { display: flex; flex-direction: column; gap: 2px; }
-.plan-summary-item .k { font-size: 10px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; }
-.plan-summary-item .v { font-family: var(--font-display); font-weight: 800; font-size: 24px; font-variant-numeric: tabular-nums; }
-.plan-arrow { font-size: 20px; color: var(--ink-faint); }
-.plan-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.plan-col {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 14px;
-  padding: 14px 16px;
-}
-.plan-col-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
-.plan-col-head h4 { margin: 0; font-family: var(--font-display); font-size: 15px; }
-.plan-col-sub { font-size: 11px; color: var(--ink-mute); margin-bottom: 12px; }
-.plan-result-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
-.plan-result-badge.ok { background: rgba(43,182,115,0.15); color: var(--success); }
-.plan-result-badge.fail { background: rgba(230,57,70,0.12); color: var(--danger); }
-.plan-result-badge.warn { background: rgba(255,159,28,0.15); color: var(--warn); }
-.plan-list { display: flex; flex-direction: column; gap: 6px; }
-.plan-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: var(--glass-bg-strong);
-  border: 1px solid var(--glass-border);
-}
-.plan-item-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
-.plan-cname { font-weight: 600; font-size: 12px; }
-.plan-pref { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
-.plan-pref.like { background: rgba(46,196,182,0.16); color: var(--accent-3); }
-.plan-pref.dislike { background: rgba(133,144,172,0.16); color: var(--ink-mute); }
-.plan-effort { font-size: 11px; color: var(--ink-soft); white-space: nowrap; }
-.plan-effort.up b { color: var(--success); }
-.plan-effort.down b { color: var(--warn); }
-.plan-tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--glass-border); color: var(--ink-mute); white-space: nowrap; }
-.plan-tag.up { background: rgba(79,107,255,0.14); color: var(--accent); }
-@media (max-width: 700px) {
-  .plan-columns { grid-template-columns: 1fr; }
-}
 @media (max-width: 700px) {
   .effort-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1384,10 +1309,10 @@ table.elements input[readonly]:focus {
   <!-- ============ 상단 바 ============ -->
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark">G</div>
+      <div class="brand-mark">세</div>
       <div class="brand-text">
         <h1>세과영 학점계산기</h1>
-        <p>by. 하흔</p>
+        <p>by. 하흔 · 4.3 만점</p>
       </div>
     </div>
     <div class="topbar-actions">
@@ -1506,7 +1431,7 @@ table.elements input[readonly]:focus {
   <!-- ============ 추천 공부 순서 (난이도 예측 기반) ============ -->
   <section class="group-section">
     <div class="section-title">
-      <h2>예상 추천 공부 순서</h2>
+      <h2>🧪 예상 추천 공부 순서</h2>
       <div class="study-toggle">
         <button class="study-tab active" data-exam="mid">중간고사</button>
         <button class="study-tab" data-exam="fin">기말고사</button>
@@ -1518,7 +1443,7 @@ table.elements input[readonly]:focus {
   <!-- ============ 기말 노력 가상 시뮬레이터 ============ -->
   <section class="group-section">
     <div class="section-title">
-      <h2>기말 노력 시뮬레이터</h2>
+      <h2>🎮 기말 노력 시뮬레이터</h2>
       <span class="hint">노력 정도별 예상 전체 평점</span>
     </div>
     <div class="glass effort-sim-card" id="effort-sim"></div>
@@ -1575,7 +1500,7 @@ table.elements input[readonly]:focus {
 
 <script>
 /* ==============================================================
-   GPA Studio · 영재고 학점 계산기
+   세과영 학점계산기 · by 하흔
    ============================================================== */
 
 /* 안전한 깊은 복사 (structuredClone 미지원 환경 대비) */
@@ -2179,102 +2104,6 @@ function simulateOverallWithEffort(effort) {
 const PREFERENCE_WEIGHT = { like: 1.2, neutral: 1.0, dislike: 0.85 };
 const PREFERENCE_LABEL = { like: "좋아함", neutral: "보통", dislike: "싫어함" };
 
-/* ── 목표 학습 계획 ──
-   미입력 기말이 있는 과목들에 노력을 배분.
-   출발 노력 = 중간 때 노력(midEffort, 없으면 mid).
-   그리디: 목표 평점 미달이면, "노력 한 단계 올렸을 때 평점 상승 × 선호도가중치"가
-   가장 큰 과목의 노력을 한 단계 올린다. 더 못 올리면 후보에서 제외.
-*/
-function computeStudyPlan(goalGPA) {
-  // 대상 과목: 비P/F + 단위>0 + 미입력 기말 보유
-  const targets = [];
-  for (const c of state.courses) {
-    if (c.pf) continue;
-    if ((Number(c.credits) || 0) <= 0) continue;
-    const fin = c.elements.find(e => e.isExam && e.name === "기말고사");
-    if (!fin) continue;
-    const finHas = fin.score !== null && fin.score !== "" && fin.score !== undefined;
-    if (finHas) continue;
-    targets.push(c);
-  }
-
-  // 백업
-  const backup = state.courses.map(c => ({ c, effort: c.examEffort, fill: c.fillEmpty }));
-  // 시뮬레이션 환경: 모든 과목 빈칸 평균채움 ON, 대상 과목은 출발 노력으로
-  for (const c of state.courses) c.fillEmpty = true;
-  // 대상 과목 노력을 "중간 때 노력"으로 초기화 (없으면 mid)
-  const effIdx = {}; // courseId -> EFFORT_ORDER 인덱스 (작을수록 노력 큼)
-  for (const c of targets) {
-    const startEffort = c.midEffort || "mid";
-    let idx = EFFORT_ORDER.indexOf(startEffort);
-    if (idx < 0) idx = EFFORT_ORDER.indexOf("mid");
-    effIdx[c.id] = idx;
-    c.examEffort = EFFORT_ORDER[idx];
-  }
-
-  const startGPA = computeOverall().overall;
-
-  // 그리디로 노력 배분
-  const assign = (stopGPA) => {
-    let guard = 0;
-    let curGPA = computeOverall().overall;
-    while (curGPA < stopGPA && guard < 200) {
-      guard++;
-      let bestC = null, bestGain = -1, bestGPA = curGPA;
-      for (const c of targets) {
-        const idx = effIdx[c.id];
-        if (idx <= 0) continue; // 이미 최상
-        const prev = c.examEffort;
-        c.examEffort = EFFORT_ORDER[idx - 1];
-        const g = computeOverall().overall;
-        c.examEffort = prev; // 원복
-        const w = PREFERENCE_WEIGHT[c.preference || "neutral"] || 1.0;
-        const gain = (g - curGPA) * w;
-        if (gain > bestGain) { bestGain = gain; bestC = c; bestGPA = g; }
-      }
-      if (!bestC || bestGain <= 0) break;
-      effIdx[bestC.id] -= 1;
-      bestC.examEffort = EFFORT_ORDER[effIdx[bestC.id]];
-      curGPA = bestGPA;
-    }
-    return curGPA;
-  };
-
-  // 1) 최소노력안: 목표 도달까지
-  const minGPA = assign(goalGPA);
-  const minPlan = targets.map(c => ({
-    course: c, effort: c.examEffort,
-    startEffort: c.midEffort || "mid",
-    raised: EFFORT_ORDER.indexOf(c.examEffort) < EFFORT_ORDER.indexOf(c.midEffort || "mid"),
-    preference: c.preference || "neutral",
-  }));
-  const minReached = minGPA >= goalGPA - 0.0001;
-
-  // 2) 안정달성안: 목표 + 0.1 까지 (이어서 더 올림)
-  const safeTarget = Math.min(4.3, goalGPA + 0.1);
-  const safeGPA = assign(safeTarget);
-  const safePlan = targets.map(c => ({
-    course: c, effort: c.examEffort,
-    startEffort: c.midEffort || "mid",
-    raised: EFFORT_ORDER.indexOf(c.examEffort) < EFFORT_ORDER.indexOf(c.midEffort || "mid"),
-    preference: c.preference || "neutral",
-  }));
-  const safeReached = safeGPA >= safeTarget - 0.0001;
-
-  // 최대 가능 (전 과목 최상)
-  const maxGPA = assign(99); // 다 올림
-  // 복원
-  for (const b of backup) { b.c.examEffort = b.effort; b.c.fillEmpty = b.fill; }
-
-  return {
-    targets, startGPA, goalGPA,
-    minPlan, minGPA, minReached,
-    safePlan, safeGPA, safeTarget, safeReached,
-    maxGPA,
-    hasTargets: targets.length > 0,
-  };
-}
-
 /* -------- 과목군별 평균 (점수 기준) -------- */
 function computeGroupAverages() {
   const groups = {};
@@ -2373,7 +2202,6 @@ function render() {
   renderGroups();
   renderStudyOrder();
   renderEffortSim();
-  renderStudyPlan();
   renderGroupFilter();
   renderCourses();
 }
@@ -2433,102 +2261,6 @@ function renderEffortSim() {
       }).join("")}
     </div>
     <div class="effort-sim-note">※ 시뮬레이션은 수행평가 빈칸도 현재 평균으로 채워 "이대로 가면" 기준으로 계산합니다. 과목별 세부 노력은 각 과목 카드에서 조정하세요.</div>
-  `;
-}
-
-/* ── 목표 학습 계획 렌더 ── */
-function renderStudyPlan() {
-  const root = $("#plan-card");
-  if (!root) return;
-  const goal = Number($("#plan-goal-gpa")?.value);
-  if (isNaN(goal) || goal <= 0) {
-    root.innerHTML = `<div class="study-empty">목표 평점을 입력해 주세요.</div>`;
-    return;
-  }
-  state.planGoalGPA = goal;
-
-  const plan = computeStudyPlan(goal);
-  if (!plan.hasTargets) {
-    root.innerHTML = `<div class="study-empty">계획을 짤 미입력 기말 과목이 없습니다. (모든 기말 입력 완료)</div>`;
-    return;
-  }
-
-  // 노력 단계 표현: 출발 → 도달
-  const effortChip = (from, to) => {
-    const raised = EFFORT_ORDER.indexOf(to) < EFFORT_ORDER.indexOf(from);
-    const same = from === to;
-    const cls = raised ? "up" : same ? "" : "down";
-    const arrow = same ? "" : ` → <b>${EFFORT_LABEL[to]}</b>`;
-    return `<span class="plan-effort ${cls}">${EFFORT_LABEL[from]}${arrow}</span>`;
-  };
-
-  const renderPlanList = (planArr) => {
-    // 노력을 올린 과목 먼저, 그 다음 유지
-    const sorted = [...planArr].sort((a, b) => {
-      const ra = EFFORT_ORDER.indexOf(a.startEffort) - EFFORT_ORDER.indexOf(a.effort);
-      const rb = EFFORT_ORDER.indexOf(b.startEffort) - EFFORT_ORDER.indexOf(b.effort);
-      return rb - ra;
-    });
-    return sorted.map(p => {
-      const prefBadge = p.preference !== "neutral"
-        ? `<span class="plan-pref ${p.preference}">${PREFERENCE_LABEL[p.preference]}</span>` : "";
-      const raised = EFFORT_ORDER.indexOf(p.effort) < EFFORT_ORDER.indexOf(p.startEffort);
-      const tag = raised ? `<span class="plan-tag up">노력 ↑</span>` : `<span class="plan-tag">유지</span>`;
-      return `
-        <div class="plan-item">
-          <div class="plan-item-main">
-            <span class="plan-cname">${escapeHtml(p.course.name)}</span>
-            ${prefBadge}
-          </div>
-          <div class="plan-item-effort">${effortChip(p.startEffort, p.effort)}</div>
-          ${tag}
-        </div>`;
-    }).join("");
-  };
-
-  const minBadge = plan.minReached
-    ? `<span class="plan-result-badge ok">목표 달성 ✓</span>`
-    : `<span class="plan-result-badge fail">최대 노력으로도 ${plan.maxGPA.toFixed(2)} (목표 미달)</span>`;
-  const safeBadge = plan.safeReached
-    ? `<span class="plan-result-badge ok">안정 달성 ✓</span>`
-    : `<span class="plan-result-badge warn">여유분까진 어려움</span>`;
-
-  root.innerHTML = `
-    <div class="plan-summary">
-      <div class="plan-summary-item">
-        <span class="k">현재 예상</span>
-        <span class="v">${plan.startGPA.toFixed(2)}</span>
-      </div>
-      <div class="plan-arrow">→</div>
-      <div class="plan-summary-item">
-        <span class="k">목표</span>
-        <span class="v" style="color:var(--accent)">${goal.toFixed(2)}</span>
-      </div>
-      <div class="plan-summary-item">
-        <span class="k">최대 가능</span>
-        <span class="v" style="color:var(--success)">${plan.maxGPA.toFixed(2)}</span>
-      </div>
-    </div>
-
-    <div class="plan-columns">
-      <div class="plan-col">
-        <div class="plan-col-head">
-          <h4>🎯 최소 노력안</h4>
-          ${minBadge}
-        </div>
-        <div class="plan-col-sub">목표 ${goal.toFixed(2)} 도달까지 꼭 필요한 만큼만 (예상 ${plan.minGPA.toFixed(2)})</div>
-        <div class="plan-list">${renderPlanList(plan.minPlan)}</div>
-      </div>
-      <div class="plan-col">
-        <div class="plan-col-head">
-          <h4>🛡️ 안정 달성안</h4>
-          ${safeBadge}
-        </div>
-        <div class="plan-col-sub">목표 + 여유(${plan.safeTarget.toFixed(2)})까지 (예상 ${plan.safeGPA.toFixed(2)})</div>
-        <div class="plan-list">${renderPlanList(plan.safePlan)}</div>
-      </div>
-    </div>
-    <div class="effort-sim-note">※ 각 과목의 '중간 때 노력'을 출발점으로, 선호도(좋아함은 약간 우대)와 평점 효율을 종합해 노력을 배분합니다. 카드에서 중간 노력·선호도를 설정하면 더 정확해집니다.</div>
   `;
 }
 
@@ -3774,7 +3506,6 @@ function init() {
 
   // 컨트롤
   $("#goal-gpa").addEventListener("input", () => renderHero());
-  $("#plan-goal-gpa").addEventListener("input", () => renderStudyPlan());
   $("#ctrl-sort").addEventListener("change", (e) => { state.sort = e.target.value; save(); renderCourses(); });
   $("#ctrl-group").addEventListener("change", (e) => { state.filterGroup = e.target.value; save(); renderCourses(); });
   $("#ctrl-only-empty").addEventListener("change", (e) => { state.onlyEmpty = e.target.checked; save(); renderCourses(); });
@@ -3823,7 +3554,6 @@ function init() {
 
   // 목표 평점 초기값
   $("#goal-gpa").value = state.goalGPA ?? 4.0;
-  $("#plan-goal-gpa").value = state.planGoalGPA ?? 4.0;
   $("#ctrl-sort").value = state.sort || "default";
 
   render();
