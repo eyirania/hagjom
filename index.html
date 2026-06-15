@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>세과영 12기 학점 계산기</title>
+<title>세과영 학점 계산기</title>
 
 <!-- Google Fonts: Pretendard 대체용 + 디스플레이 폰트 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1234,8 +1234,8 @@ table.elements input[readonly]:focus {
     <div class="brand">
       <div class="brand-mark">G</div>
       <div class="brand-text">
-        <h1>GPA Studio</h1>
-        <p>영재고 · 4.3 만점 학점 계산기</p>
+        <h1>세과영</h1>
+        <p>학점 계산기 by 하흔</p>
       </div>
     </div>
     <div class="topbar-actions">
@@ -1754,17 +1754,36 @@ function computeCourse(course) {
   const examRemain = round2(examMark - examFilledMark);
   const perfRemain = round2(perfMark - perfFilledMark);
 
-  // 예상 점수: 시험 빈칸은 시험 평균으로, 수행 빈칸은 수행 평균으로 각각 채움
+  // 난이도 기반 기말 예측 (먼저 계산해서 예상 점수에 반영)
+  const examInfo = computeExamForecast(course);
+
+  // 기말고사가 빈칸이고 예측값이 있으면, 그 부분은 예측 점수로 채운다
+  const finEl = course.elements.find(e => e.isExam && e.name === "기말고사");
+  const finMark = finEl ? (Number(finEl.mark) || 0) : 0;
+  const finHasScore = finEl && finEl.score !== null && finEl.score !== "" && finEl.score !== undefined && !isNaN(Number(finEl.score));
+  const hasFinPredict = examInfo && !finHasScore && examInfo.predictedFinalScore !== null && examInfo.predictedFinalScore !== undefined;
+
+  // 예상 점수: 기말 예측값이 있으면 항상 반영(명시적 기능), 그 외 빈칸은 fillEmpty 따름
   let expectedScore;
   if (!hasRealScore) {
     expectedScore = round2(filledScore);
-  } else if (course.fillEmpty) {
-    let est = filledScore;
-    if (examPct !== null) est += examRemain * examPct;
-    if (perfPct !== null) est += perfRemain * perfPct;
-    expectedScore = round2(est);
   } else {
-    expectedScore = round2(filledScore);
+    let est = filledScore;
+    const fill = course.fillEmpty;
+    // 기말 예측: fillEmpty와 무관하게 반영
+    let finCounted = false;
+    if (hasFinPredict) {
+      est += examInfo.predictedFinalScore;
+      finCounted = true;
+    }
+    if (fill) {
+      // 나머지 시험 빈칸 (기말 제외분)
+      const otherExamRemain = round2(Math.max(0, examRemain - (finCounted ? finMark : 0)));
+      if (examPct !== null && otherExamRemain > 0) est += otherExamRemain * examPct;
+      // 수행 빈칸
+      if (perfPct !== null && perfRemain > 0) est += perfRemain * perfPct;
+    }
+    expectedScore = round2(est);
   }
 
   const worst = round2(filledScore + remainingMark * 0);
@@ -1773,9 +1792,6 @@ function computeCourse(course) {
   const gradeObj = hasRealScore ? gradeFromScore(expectedScore) : null;
   const expectedGrade = gradeObj ? gradeObj.grade : null;
   const expectedGPA   = gradeObj ? gradeObj.gpa : null;
-
-  // 난이도 기반 기말 예측
-  const examInfo = computeExamForecast(course);
 
   return {
     pf: false,
@@ -1801,7 +1817,7 @@ function computeCourse(course) {
     examFilledScore: round2(examFilledScore), examPct, examRemain, examFilledCount,
     perfMark: round2(perfMark), perfFilledMark: round2(perfFilledMark),
     perfFilledScore: round2(perfFilledScore), perfPct, perfRemain, perfFilledCount,
-    examInfo,
+    examInfo, hasFinPredict,
   };
 }
 
@@ -1878,7 +1894,7 @@ function computeExamForecast(course) {
       if (basePct !== null) basisText = `기준 ${mv.toFixed(0)}%`;
     } else if (baseline === "global") {
       basePct = globalExamAvgPct();
-      if (basePct !== null) basisText = `전과목 시험 평균 ${(basePct*100).toFixed(0)}%`;
+      if (basePct !== null) basisText = `전과목 중간고사 평균 ${(basePct*100).toFixed(0)}%`;
     }
     if (basePct !== null) {
       predictedFinalPct = Math.max(0, Math.min(1, basePct + delta));
@@ -1897,12 +1913,13 @@ function computeExamForecast(course) {
 }
 
 /* 전과목 시험(중간+기말) 평균 득점률 — 입력된 시험 점수 전체 기준 */
+/* 전과목 '중간고사' 평균 득점률 — 점수가 입력된 중간고사만 (안 본 과목 제외) */
 function globalExamAvgPct() {
   let fm = 0, fs = 0;
   for (const c of state.courses) {
     if (c.pf) continue;
     for (const el of c.elements) {
-      if (!el.isExam) continue;
+      if (!el.isExam || el.name !== "중간고사") continue;
       const has = el.score !== null && el.score !== "" && el.score !== undefined && !isNaN(Number(el.score));
       if (has) { fm += Number(el.mark) || 0; fs += Number(el.score); }
     }
@@ -2670,6 +2687,7 @@ function renderCourseBody(c, r) {
            ${escapeHtml(ei.basisText)}
            ${ei.delta!==0 ? `(${ei.delta>0?"+":""}${(ei.delta*100).toFixed(0)}%p)` : ""}
            → 기말 예상 <b style="color:var(--accent-3)">${ei.predictedFinalScore.toFixed(1)} / ${ei.finMark}점 (${(ei.predictedFinalPct*100).toFixed(0)}%)</b>
+           <span style="display:inline-block;margin-top:4px;font-size:11px;color:var(--success)">✓ 이 점수가 예상 점수·평점에 반영됩니다</span>
          </div>`
       : `<div style="font-size:12px;color:var(--ink-mute)">예측에 필요한 기준 점수가 부족합니다.</div>`;
 
@@ -2717,7 +2735,7 @@ function renderCourseBody(c, r) {
         const baselineOptions = `
           <option value="perf" ${baseline==='perf'?'selected':''}>수행평가 평균</option>
           <option value="manual" ${baseline==='manual'?'selected':''}>직접 입력</option>
-          <option value="global" ${baseline==='global'?'selected':''}>전과목 시험 평균</option>`;
+          <option value="global" ${baseline==='global'?'selected':''}>전과목 중간고사 평균</option>`;
         const manualInput = baseline === "manual"
           ? `<div class="exam-diff-row" style="margin-top:6px">
                <span style="font-size:12px;color:var(--ink-soft)">기준 득점률 (%)</span>
@@ -3140,7 +3158,7 @@ function exportJSON() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `gpa-studio-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `gpa-predict-hahn-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   toast("JSON으로 내보냈어요", "success");
@@ -3186,7 +3204,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `gpa-studio-${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = `gpa-predict-hahn-${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
   toast("CSV로 내보냈어요", "success");
