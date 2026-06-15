@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HAHEUN Studio · 세과영 1학년 학점 계산기</title>
+<title>세과영 12기 학점 계산기</title>
 
 <!-- Google Fonts: Pretendard 대체용 + 디스플레이 폰트 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -461,6 +461,137 @@ header.topbar {
 .stat.danger .stat-value  { color: var(--danger); }
 
 .group-section { margin-bottom: 22px; }
+
+/* 추천 공부 순서 */
+.study-toggle {
+  display: inline-flex;
+  background: var(--glass-border);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+.study-tab {
+  border: none;
+  background: transparent;
+  color: var(--ink-mute);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.study-tab.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px rgba(79, 107, 255, 0.3);
+}
+.study-order-card { padding: 18px 20px; }
+.study-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: transform 0.2s ease;
+}
+.study-item:last-child { margin-bottom: 0; }
+.study-item:hover { transform: translateX(3px); }
+.study-rank {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.study-rank.r1 { color: var(--danger); }
+.study-rank.r2 { color: var(--warn); }
+.study-rank.r3 { color: var(--accent); }
+.study-info { flex: 1; min-width: 0; }
+.study-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.study-meta { font-size: 11px; color: var(--ink-mute); }
+.study-urgency {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.study-urgency.high { background: rgba(230, 57, 70, 0.12); color: var(--danger); }
+.study-urgency.mid  { background: rgba(255, 159, 28, 0.14); color: var(--warn); }
+.study-urgency.low  { background: rgba(43, 182, 115, 0.14); color: var(--success); }
+.study-empty { font-size: 12px; color: var(--ink-mute); text-align: center; padding: 20px; }
+
+/* 난이도 예측 카드 */
+.exam-forecast-card {
+  background: rgba(46, 196, 182, 0.06);
+  border: 1px dashed rgba(46, 196, 182, 0.35);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.exam-diff-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.exam-diff-row select {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+}
+.exam-diff-row select:focus { border-color: var(--accent-3); }
+
+/* 기말 예측 모드 탭 (기말만 있는 과목) */
+.forecast-mode-tabs {
+  display: inline-flex;
+  background: var(--glass-border);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.fmode-tab {
+  border: none;
+  background: transparent;
+  color: var(--ink-mute);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.fmode-tab.active {
+  background: var(--accent-3);
+  color: white;
+}
+.exam-diff-row input.forecast-manual {
+  width: 80px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+  text-align: right;
+}
+.exam-diff-row input.forecast-manual:focus { border-color: var(--accent-3); }
 .section-title {
   display: flex;
   align-items: baseline;
@@ -1103,8 +1234,8 @@ table.elements input[readonly]:focus {
     <div class="brand">
       <div class="brand-mark">G</div>
       <div class="brand-text">
-        <h1>HAHEUN Studio</h1>
-        <p>세과영 · 4.3 만점 학점 계산기</p>
+        <h1>GPA Studio</h1>
+        <p>영재고 · 4.3 만점 학점 계산기</p>
       </div>
     </div>
     <div class="topbar-actions">
@@ -1220,6 +1351,18 @@ table.elements input[readonly]:focus {
     <div class="group-grid" id="group-grid"></div>
   </section>
 
+  <!-- ============ 추천 공부 순서 (난이도 예측 기반) ============ -->
+  <section class="group-section">
+    <div class="section-title">
+      <h2>🧪 예상 추천 공부 순서</h2>
+      <div class="study-toggle">
+        <button class="study-tab active" data-exam="mid">중간고사</button>
+        <button class="study-tab" data-exam="fin">기말고사</button>
+      </div>
+    </div>
+    <div class="glass study-order-card" id="study-order"></div>
+  </section>
+
   <!-- ============ 컨트롤 ============ -->
   <section class="glass controls">
     <label>정렬
@@ -1273,6 +1416,14 @@ table.elements input[readonly]:focus {
 /* ==============================================================
    GPA Studio · 영재고 학점 계산기
    ============================================================== */
+
+/* 안전한 깊은 복사 (structuredClone 미지원 환경 대비) */
+function deepClone(obj) {
+  if (typeof structuredClone === "function") {
+    try { return structuredClone(obj); } catch (e) {}
+  }
+  return JSON.parse(JSON.stringify(obj));
+}
 
 /* -------- 기본 등급표 (이상 기준) -------- */
 const DEFAULT_GRADING = [
@@ -1442,6 +1593,7 @@ function defaultCourses() {
 /* -------- 유틸 -------- */
 function uid() { return Math.random().toString(36).slice(2, 10); }
 function round2(n) { return Math.round(n * 100) / 100; }
+function round3(n) { return Math.round(n * 1000) / 1000; }
 function round3to2(n) {
   // 소수점 셋째 자리에서 반올림하여 둘째 자리까지
   return Math.round(n * 100) / 100;
@@ -1451,10 +1603,11 @@ function clamp(n, mn, mx) { return Math.max(mn, Math.min(mx, n)); }
 /* -------- 상태 -------- */
 let state = {
   courses: defaultCourses(),
-  grading: structuredClone(DEFAULT_GRADING),
+  grading: deepClone(DEFAULT_GRADING),
   theme: "light",
   expanded: {},        // courseId -> bool
   goalGPA: 4.0,
+  studyExam: "mid",
   sort: "default",
   filterGroup: "all",
   onlyEmpty: false,
@@ -1558,62 +1711,71 @@ function computeCourse(course) {
   let sumMark = 0;        // 전체 배점 합
   let filledMark = 0;     // 점수 입력된 배점 합 (base 포함)
   let filledScore = 0;    // 점수 입력된 점수 합 (base 포함)
-  // "실력 평균" 계산용: 자동만점 기본점수는 제외해야 평균이 왜곡되지 않음
-  let realFilledMark = 0;
-  let realFilledScore = 0;
-  let realFilledCount = 0; // 실제 사용자가 입력한 비-base 항목 개수
+  // 실력 평균(자동만점 base 제외)
+  let realFilledMark = 0, realFilledScore = 0, realFilledCount = 0;
+  // 시험(지필) 항목 분리 집계
+  let examMark = 0, examFilledMark = 0, examFilledScore = 0, examFilledCount = 0;
+  // 수행 항목 분리 집계 (시험 아님 + base 아님)
+  let perfMark = 0, perfFilledMark = 0, perfFilledScore = 0, perfFilledCount = 0;
   let baseInfo = null;
   let hasInvalid = false;
 
   for (const el of course.elements) {
     const m = Number(el.mark) || 0;
     sumMark += m;
-    if (el.isBase) {
-      baseInfo = { mark: m };
-    }
+    if (el.isBase) baseInfo = { mark: m };
+
     const hasScore = el.score !== null && el.score !== "" && el.score !== undefined && !isNaN(Number(el.score));
-    if (hasScore) {
-      let s = Number(el.score);
-      if (s > m) hasInvalid = true;
-      filledMark += m;
-      filledScore += s;
-      // 기본점수(항상 자동만점)는 실력 평균 계산에서 제외
-      if (!el.isBase) {
-        realFilledMark += m;
-        realFilledScore += s;
-        realFilledCount++;
-      }
+    let s = hasScore ? Number(el.score) : 0;
+    if (hasScore && s > m) hasInvalid = true;
+
+    if (hasScore) { filledMark += m; filledScore += s; }
+
+    if (el.isBase) continue; // base는 분류 집계에서 제외 (자동만점)
+
+    if (hasScore) { realFilledMark += m; realFilledScore += s; realFilledCount++; }
+
+    if (el.isExam) {
+      examMark += m;
+      if (hasScore) { examFilledMark += m; examFilledScore += s; examFilledCount++; }
+    } else {
+      perfMark += m;
+      if (hasScore) { perfFilledMark += m; perfFilledScore += s; perfFilledCount++; }
     }
   }
 
   const remainingMark = round2(sumMark - filledMark);
-  // currentPct는 실력 항목만으로 계산 (자동만점 base 제외)
   const currentPct = realFilledMark > 0 ? realFilledScore / realFilledMark : 0;
   const hasRealScore = realFilledCount > 0;
 
-  // 예상 점수:
-  //   fillEmpty 켜짐 + 실력 점수 있음 → 빈칸을 평균으로 채워 외삽
-  //   그 외 → 현재 확정 점수 (filledScore)
-  // 평점/등급도 hasRealScore가 false면 산출하지 않음 (자동만점 base만 있는 상태에서 A+ 잘못 표시 방지)
+  // 영역별 득점률
+  const examPct = examFilledMark > 0 ? examFilledScore / examFilledMark : null;
+  const perfPct = perfFilledMark > 0 ? perfFilledScore / perfFilledMark : null;
+  const examRemain = round2(examMark - examFilledMark);
+  const perfRemain = round2(perfMark - perfFilledMark);
+
+  // 예상 점수: 시험 빈칸은 시험 평균으로, 수행 빈칸은 수행 평균으로 각각 채움
   let expectedScore;
-  let canShowGrade = hasRealScore;
   if (!hasRealScore) {
-    // 아직 진짜 평가 점수가 없음 → "현재 점수"만 표시, 등급은 없음
-    expectedScore = round2(filledScore); // 자동만점 base만 있다면 그 값
+    expectedScore = round2(filledScore);
   } else if (course.fillEmpty) {
-    expectedScore = round2(filledScore + remainingMark * currentPct);
+    let est = filledScore;
+    if (examPct !== null) est += examRemain * examPct;
+    if (perfPct !== null) est += perfRemain * perfPct;
+    expectedScore = round2(est);
   } else {
     expectedScore = round2(filledScore);
   }
 
-  // 최악 / 최선 (이건 항상 계산 가능)
   const worst = round2(filledScore + remainingMark * 0);
   const best  = round2(filledScore + remainingMark * 1);
 
-  // 등급/평점은 실제 평가 점수가 있을 때만 산출
-  const gradeObj = canShowGrade ? gradeFromScore(expectedScore) : null;
+  const gradeObj = hasRealScore ? gradeFromScore(expectedScore) : null;
   const expectedGrade = gradeObj ? gradeObj.grade : null;
   const expectedGPA   = gradeObj ? gradeObj.gpa : null;
+
+  // 난이도 기반 기말 예측
+  const examInfo = computeExamForecast(course);
 
   return {
     pf: false,
@@ -1635,7 +1797,117 @@ function computeCourse(course) {
     baseInfo,
     hasInvalid,
     isComplete: remainingMark <= 0 && hasRealScore,
+    examMark: round2(examMark), examFilledMark: round2(examFilledMark),
+    examFilledScore: round2(examFilledScore), examPct, examRemain, examFilledCount,
+    perfMark: round2(perfMark), perfFilledMark: round2(perfFilledMark),
+    perfFilledScore: round2(perfFilledScore), perfPct, perfRemain, perfFilledCount,
+    examInfo,
   };
+}
+
+/* 난이도 변화 → 득점률 보정 (중간 강도: ±3%p 단위) */
+const DIFFICULTY_DELTA = {
+  much_easier: +0.06, easier: +0.03, similar: 0.00, harder: -0.03, much_harder: -0.06,
+};
+const DIFFICULTY_LABEL = {
+  much_easier: "매우 쉬워짐", easier: "쉬워짐", similar: "비슷함",
+  harder: "어려워짐", much_harder: "매우 어려워짐",
+};
+
+/* 중간고사 점수 + 난이도로 기말고사 예상 득점률/점수 추정 */
+function computeExamForecast(course) {
+  const mid = course.elements.find(e => e.isExam && e.name === "중간고사");
+  const fin = course.elements.find(e => e.isExam && e.name === "기말고사");
+  if (!fin) return null; // 기말이 없으면 예측 대상 아님
+
+  const midMark = mid ? (Number(mid.mark) || 0) : 0;
+  const finMark = Number(fin.mark) || 0;
+  const midHas = mid && mid.score !== null && mid.score !== "" && mid.score !== undefined && !isNaN(Number(mid.score));
+  const finHas = fin.score !== null && fin.score !== "" && fin.score !== undefined && !isNaN(Number(fin.score));
+  const hasMidExam = !!mid; // 중간고사 항목 자체가 존재하는지
+
+  const diff = course.examDifficulty || "similar";
+  const delta = DIFFICULTY_DELTA[diff] ?? 0;
+
+  // 영역 평균을 직접 계산 (computeCourse 호출 금지 — 순환 방지)
+  let perfFM = 0, perfFS = 0;
+  for (const el of course.elements) {
+    if (el.isBase || el.isExam) continue;
+    const has = el.score !== null && el.score !== "" && el.score !== undefined && !isNaN(Number(el.score));
+    if (has) { perfFM += Number(el.mark) || 0; perfFS += Number(el.score); }
+  }
+  const perfPctLocal = perfFM > 0 ? perfFS / perfFM : null;
+
+  let predictedFinalPct = null;
+  let basisText = "";
+
+  if (hasMidExam) {
+    // ── 중간고사가 있는 과목: 중간 점수 + 난이도 ──
+    const midPct = (midHas && midMark > 0) ? Number(mid.score) / midMark : null;
+    if (midPct !== null) {
+      predictedFinalPct = Math.max(0, Math.min(1, midPct + delta));
+      basisText = `중간 ${(midPct*100).toFixed(0)}% + 난이도 ${DIFFICULTY_LABEL[diff]}`;
+    }
+    return {
+      mode: "mid", hasMidExam, midMark, finMark, midHas, finHas,
+      midPct, diff, delta, predictedFinalPct,
+      predictedFinalScore: predictedFinalPct !== null ? round2(predictedFinalPct * finMark) : null,
+      active: midHas && !finHas, basisText,
+    };
+  }
+
+  // ── 기말만 있는 과목: 모드 선택 ──
+  const fMode = course.examForecastMode || "perf"; // "perf" | "difficulty"
+
+  if (fMode === "perf") {
+    // 수행 평균 그대로
+    if (perfPctLocal !== null) {
+      predictedFinalPct = perfPctLocal;
+      basisText = `수행 평균 ${(perfPctLocal*100).toFixed(0)}%`;
+    }
+  } else {
+    // 난이도 기준: 기준선 선택
+    const baseline = course.forecastBaseline || "perf"; // "perf" | "manual" | "global"
+    let basePct = null;
+    if (baseline === "perf") {
+      basePct = perfPctLocal;
+      if (basePct !== null) basisText = `수행 평균 ${(basePct*100).toFixed(0)}%`;
+    } else if (baseline === "manual") {
+      const mv = Number(course.forecastManualPct);
+      basePct = (!isNaN(mv) && mv >= 0) ? mv / 100 : null;
+      if (basePct !== null) basisText = `기준 ${mv.toFixed(0)}%`;
+    } else if (baseline === "global") {
+      basePct = globalExamAvgPct();
+      if (basePct !== null) basisText = `전과목 시험 평균 ${(basePct*100).toFixed(0)}%`;
+    }
+    if (basePct !== null) {
+      predictedFinalPct = Math.max(0, Math.min(1, basePct + delta));
+      basisText += ` + 난이도 ${DIFFICULTY_LABEL[diff]}`;
+    }
+  }
+
+  return {
+    mode: "finonly", forecastMode: fMode, baseline: course.forecastBaseline || "perf",
+    hasMidExam: false, midMark: 0, finMark, midHas: false, finHas,
+    diff, delta, predictedFinalPct,
+    predictedFinalScore: predictedFinalPct !== null ? round2(predictedFinalPct * finMark) : null,
+    active: !finHas, basisText,
+    manualPct: course.forecastManualPct,
+  };
+}
+
+/* 전과목 시험(중간+기말) 평균 득점률 — 입력된 시험 점수 전체 기준 */
+function globalExamAvgPct() {
+  let fm = 0, fs = 0;
+  for (const c of state.courses) {
+    if (c.pf) continue;
+    for (const el of c.elements) {
+      if (!el.isExam) continue;
+      const has = el.score !== null && el.score !== "" && el.score !== undefined && !isNaN(Number(el.score));
+      if (has) { fm += Number(el.mark) || 0; fs += Number(el.score); }
+    }
+  }
+  return fm > 0 ? fs / fm : null;
 }
 
 /* 빈칸을 비율 r로 채웠을 때 점수 → 평점 (전체 시나리오용) */
@@ -1728,15 +2000,41 @@ function reverseCourseTarget(course) {
   const r = computeCourse(course);
   const cut = gradeCut(course.targetGrade);
   if (cut === null || cut === undefined) return null;
+
   if (r.remainingMark <= 0) {
     if (r.expectedScore >= cut) return { state: "achieved" };
     return { state: "missed" };
   }
+
+  // ── 시험 빈칸이 남아 있으면: 수행 빈칸은 현재 수행 평균으로 채우고, 시험에서 필요한 점수 역산 ──
+  if (r.examRemain > 0) {
+    // 수행 빈칸을 현재 수행 평균(perfPct)으로 채운 가정 점수.
+    // 수행 평균이 없으면(수행 점수 전무) 수행 빈칸은 일단 평균 미정 → 0으로 보지 않고
+    // "수행 평균 미정" 플래그만 두고 시험 필요점수만 산출.
+    const perfFillPct = r.perfPct !== null ? r.perfPct : null;
+    const perfAssumed = (perfFillPct !== null) ? r.perfRemain * perfFillPct : 0;
+    // 확정 점수(base 포함) + 수행 빈칸 가정 + (시험에서 받을 점수 X) = cut
+    const fixedPart = r.filledScore + perfAssumed;
+    const needExamScore = round2(cut - fixedPart);
+    const examReq = r.examRemain > 0 ? needExamScore / r.examRemain : 0;
+
+    if (examReq <= 0) return { state: "achieved", mode: "exam", needExamScore: 0, examReq: 0, examRemain: r.examRemain, perfAssumed: round2(perfAssumed), perfFillPct };
+    if (examReq > 1.0001) return { state: "impossible", mode: "exam", needExamScore, examReq, examRemain: r.examRemain, perfAssumed: round2(perfAssumed), perfFillPct };
+    return {
+      state: "need", mode: "exam",
+      needExamScore, examReq,
+      examRemain: r.examRemain,
+      perfAssumed: round2(perfAssumed),
+      perfFillPct,
+    };
+  }
+
+  // ── 시험은 다 끝났고 수행만 남은 경우: 남은 수행에서 필요 비율 ──
   const needScore = cut - r.filledScore;
   const requiredPct = needScore / r.remainingMark;
-  if (requiredPct <= 0) return { state: "achieved", requiredPct: 0 };
-  if (requiredPct > 1.0001) return { state: "impossible", requiredPct };
-  return { state: "need", requiredPct };
+  if (requiredPct <= 0) return { state: "achieved", mode: "perf", requiredPct: 0 };
+  if (requiredPct > 1.0001) return { state: "impossible", mode: "perf", requiredPct };
+  return { state: "need", mode: "perf", requiredPct };
 }
 
 /* -------- 다음 등급까지 거리 -------- */
@@ -1766,8 +2064,172 @@ function render() {
   renderHero();
   renderSummary();
   renderGroups();
+  renderStudyOrder();
   renderGroupFilter();
   renderCourses();
+}
+
+/* ── 추천 공부 순서: 단위수 × 위험도 ──
+   대상: 선택된 시험(중간/기말)이 아직 비어있는 시험 과목.
+   위험도(0~1): 목표 등급 달성에 필요한 시험 득점률(examReq)을 기준으로,
+     - 시험에서 많이 받아야 할수록(빡셀수록) 위험 ↑
+     - 이미 달성권이면 위험 ↓
+   위급도 = 단위수 × 위험도. 높은 순으로 정렬.
+*/
+function renderStudyOrder() {
+  const root = $("#study-order");
+  if (!root) return;
+  const examKind = state.studyExam || "mid"; // "mid" | "fin"
+  const examName = examKind === "mid" ? "중간고사" : "기말고사";
+
+  const items = [];
+  for (const c of state.courses) {
+    if (c.pf) continue;
+    const w = Number(c.credits) || 0;
+    if (w <= 0) continue;
+    const examEl = c.elements.find(e => e.isExam && e.name === examName);
+    if (!examEl) continue;
+    const has = examEl.score !== null && examEl.score !== "" && examEl.score !== undefined;
+    if (has) continue; // 이미 본 시험은 공부 대상 아님
+
+    const eff = computeStudyEfficiency(c, examName);
+    if (!eff) continue;
+    items.push({ course: c, w, examMark: Number(examEl.mark) || 0, ...eff });
+  }
+
+  if (!items.length) {
+    root.innerHTML = `<div class="study-empty">${examName}가 남은 시험 과목이 없습니다. (모두 입력했거나 시험이 없는 과목)</div>`;
+    return;
+  }
+
+  // 정렬: ① 도달 가능 항목 먼저(효율 높은 순) ② unreachable은 맨 뒤
+  items.sort((a, b) => {
+    if (a.unreachable !== b.unreachable) return a.unreachable ? 1 : -1;
+    return b.efficiency - a.efficiency;
+  });
+
+  // 색상 기준: 도달 가능하고 999(이미 도달)가 아닌 항목들의 최대 효율
+  const reachableEffs = items.filter(x => !x.unreachable && x.efficiency < 900).map(x => x.efficiency);
+  const maxEff = reachableEffs.length ? Math.max(...reachableEffs) : 0.0001;
+
+  root.innerHTML = items.map((it, i) => {
+    const rank = i + 1;
+    const rankCls = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
+    let uCls, uText;
+    if (it.unreachable) { uCls = "low"; uText = "이 시험만으론 부족"; }
+    else if (it.efficiency >= 900) { uCls = "low"; uText = "이미 등급 도달"; }
+    else if (it.efficiency >= maxEff * 0.66) { uCls = "high"; uText = "가성비 최상"; }
+    else if (it.efficiency >= maxEff * 0.33) { uCls = "mid"; uText = "가성비 보통"; }
+    else if (it.efficiency > 0) { uCls = "low"; uText = "가성비 낮음"; }
+    else { uCls = "low"; uText = "안정권"; }
+
+    const effText = it.efficiency >= 900 ? "—" : it.efficiency.toFixed(3);
+    return `
+      <div class="study-item">
+        <div class="study-rank ${rankCls}">${rank}</div>
+        <div class="study-info">
+          <div class="study-name">${escapeHtml(it.course.name)} <span style="font-size:11px;color:var(--ink-mute);font-weight:400">· ${examName} ${it.examMark}점</span></div>
+          <div class="study-meta">${escapeHtml(it.reqText)}</div>
+          <div class="study-meta">효율 <b style="color:var(--accent)">${effText}</b> = (Δ평점 ${it.gpaGain.toFixed(1)} × 단위 ${it.w}) ÷ 기말 +${(it.extraExamPoints||0).toFixed(1)}점</div>
+        </div>
+        <div class="study-urgency ${uCls}">${uText}</div>
+      </div>`;
+  }).join("");
+}
+
+/* ── 공부 효율(위급도) 계산 ──
+   효율 = (다음 등급 평점 − 현재 등급 평점) × 단위수 / 그 등급에 도달하기 위해 대상 시험에서 더 받아야 하는 원점수
+   - 기준점 = filledScore + (대상 시험 외 빈칸은 각자 평균으로 채운 값). 대상 시험은 0으로 둠.
+   - 다음 등급컷 − 기준점 = 대상 시험에서 채워야 하는 "전체 점수"
+   - 전체 점수 → 대상 시험 원점수로 환산 (시험 1원점 = 전체 examMark/100 점)
+*/
+function computeStudyEfficiency(course, examName) {
+  const examEl = course.elements.find(e => e.isExam && e.name === examName);
+  if (!examEl) return null;
+  const examMark = Number(examEl.mark) || 0;   // 이 시험의 환산 만점 (예: 30)
+  if (examMark <= 0) return null;
+
+  const r = computeCourse(course);
+  if (!r.hasRealScore) return null;
+
+  // ── 기준점 = 카드와 동일한 "예상 점수" (모든 빈칸을 각 영역 평균으로 채움, 대상 시험 포함) ──
+  // computeCourse의 expectedScore는 fillEmpty가 꺼져 있으면 확정점수만 주므로,
+  // 추천 순서에서는 항상 평균채움 기준으로 다시 계산한다.
+  const fallbackPct = (r.currentPct && r.currentPct > 0) ? r.currentPct : null;
+  const examFillPct = (r.examPct !== null) ? r.examPct : (r.perfPct !== null ? r.perfPct : fallbackPct);
+  const perfFillPct = (r.perfPct !== null) ? r.perfPct : (r.examPct !== null ? r.examPct : fallbackPct);
+
+  // 예상 점수(평균채움): 확정점수 + 시험 빈칸 평균 + 수행 빈칸 평균
+  let expected = r.filledScore;
+  if (examFillPct !== null && r.examRemain > 0) expected += r.examRemain * examFillPct;
+  if (perfFillPct !== null && r.perfRemain > 0) expected += r.perfRemain * perfFillPct;
+  expected = round2(expected);
+
+  // 대상 시험을 "평균대로" 받았다고 가정할 때 그 시험에서 얻는 원점수(환산점수)
+  // (대상 시험이 빈칸일 때만 추천 대상이므로 평균으로 채워진 상태)
+  const examAvgScore = round2(examMark * (examFillPct !== null ? examFillPct : 0));
+
+  // 현재 등급 / 다음 등급 (예상 점수 기준)
+  const sorted = [...state.grading].sort((a, b) => b.cut - a.cut);
+  let curIdx = sorted.findIndex(g => expected >= g.cut);
+  if (curIdx === -1) curIdx = sorted.length - 1;
+  const cur = sorted[curIdx];
+  const next = sorted[curIdx - 1];
+
+  // 이미 최상위 등급
+  if (!next) {
+    return {
+      efficiency: 0, gpaGain: 0, expected, examAvgScore,
+      needTotal: 0, extraExamPoints: 0, targetExamScore: examAvgScore,
+      unreachable: false, alreadyTop: true,
+      reqText: `예상 ${expected.toFixed(1)}점 · 이미 ${cur.grade} (최고 등급, 안정권)`,
+    };
+  }
+
+  const gpaGain = round2(next.gpa - cur.gpa);
+  const needTotal = round2(next.cut - expected);            // 다음 컷까지 더 필요한 전체 점수
+  const extraExamPoints = round2(needTotal / (examMark / 100)); // 그걸 기말 원점수로 환산 = 평균보다 더 받을 점수
+  // 목표 기말 원점수 = 평균 받았을 때 원점수 + 추가분 (환산 → 원점수로 보정)
+  const examAvgRaw = round2((examFillPct !== null ? examFillPct : 0) * 100); // 평균 원점수(%)
+  const targetExamRaw = round2(examAvgRaw + needTotal / (examMark / 100));   // 목표 원점수(%)
+
+  // 기말 원점수 100점 받아도 다음 컷 못 가면 unreachable
+  const unreachable = targetExamRaw > 100.0001;
+
+  let efficiency;
+  if (needTotal <= 0) {
+    efficiency = 999; // 이미 다음 등급 도달
+  } else if (unreachable) {
+    efficiency = (gpaGain * (Number(course.credits) || 0)) / Math.max(extraExamPoints, 1);
+  } else {
+    efficiency = (gpaGain * (Number(course.credits) || 0)) / Math.max(extraExamPoints, 0.1);
+  }
+  efficiency = round3(efficiency);
+
+  // 이미 다음 등급 도달이면 그 위 등급으로 한 번 더
+  if (needTotal <= 0 && curIdx - 2 >= 0) {
+    const next2 = sorted[curIdx - 2];
+    const gpaGain2 = round2(next2.gpa - next.gpa);
+    const needTotal2 = round2(next2.cut - expected);
+    const extra2 = round2(needTotal2 / (examMark / 100));
+    const targetRaw2 = round2(examAvgRaw + needTotal2 / (examMark / 100));
+    return {
+      efficiency: round3((gpaGain2 * (Number(course.credits)||0)) / Math.max(extra2, 0.1)),
+      gpaGain: gpaGain2, expected, examAvgScore,
+      needTotal: needTotal2, extraExamPoints: extra2, targetExamRaw: targetRaw2,
+      unreachable: targetRaw2 > 100.0001, alreadyTop: false,
+      reqText: `예상 ${expected.toFixed(1)}점 (${next.grade} 도달) · ${next2.grade}(${next2.cut})까지 기말 +${extra2.toFixed(1)}점 더`,
+    };
+  }
+
+  const reqText = unreachable
+    ? `예상 ${expected.toFixed(1)}점 · ${next.grade}(${next.cut}) 가려면 기말 +${extraExamPoints.toFixed(1)}점 (만점 초과)`
+    : `예상 ${expected.toFixed(1)}점 · ${cur.grade}→${next.grade}(${next.cut})까지 기말 +${extraExamPoints.toFixed(1)}점 더`;
+
+  return {
+    efficiency, gpaGain, expected, examAvgScore,
+    needTotal, extraExamPoints, targetExamRaw, unreachable, alreadyTop: false, reqText,
+  };
 }
 
 function renderHero() {
@@ -2002,7 +2464,10 @@ function renderCourseCard(c, r) {
     if (t) {
       if (t.state === "achieved") flags.push(`<span class="flag goal">🎯 ${c.targetGrade} 달성</span>`);
       else if (t.state === "impossible") flags.push(`<span class="flag risk">🎯 ${c.targetGrade} 불가</span>`);
-      else if (t.state === "need") flags.push(`<span class="flag goal">🎯 ${c.targetGrade} ${(t.requiredPct*100).toFixed(1)}% 필요</span>`);
+      else if (t.state === "need") {
+        if (t.mode === "exam") flags.push(`<span class="flag goal">🎯 ${c.targetGrade} 시험 ${(t.examReq*100).toFixed(0)}% 필요</span>`);
+        else flags.push(`<span class="flag goal">🎯 ${c.targetGrade} ${(t.requiredPct*100).toFixed(0)}% 필요</span>`);
+      }
       else if (t.state === "missed") flags.push(`<span class="flag risk">🎯 ${c.targetGrade} 미달</span>`);
     }
   }
@@ -2117,11 +2582,13 @@ function renderCourseBody(c, r) {
   }
 
   // 시나리오 / 빈칸 토글 영역
+  const examPctTxt = r.examPct !== null ? `시험 ${(r.examPct*100).toFixed(0)}%` : "시험 -";
+  const perfPctTxt = r.perfPct !== null ? `수행 ${(r.perfPct*100).toFixed(0)}%` : "수행 -";
   const fillToggleHtml = `
     <div class="sim-bar">
       <label class="toggle">
         <input type="checkbox" data-act="fillempty" ${c.fillEmpty?"checked":""}>
-        빈칸을 현재 평균(${(r.currentPct*100).toFixed(1)}%)으로 채워서 예상 점수 표시
+        빈칸 채우기 (${examPctTxt} · ${perfPctTxt} 평균 적용)
       </label>
       <span style="font-family:var(--font-display);font-weight:700">
         최악 ${r.worst.toFixed(1)} · 예상 ${r.expectedScore.toFixed(2)} · 최선 ${r.best.toFixed(1)}
@@ -2162,20 +2629,127 @@ function renderCourseBody(c, r) {
   // 목표 분석
   let goalAnalysisHtml = "";
   const t = reverseCourseTarget(c);
-  if (t && r.sumMark > 0) {
+  if (t && r.sumMark > 0 && r.hasRealScore) {
+    const cut = gradeCut(c.targetGrade);
     if (t.state === "achieved") {
-      goalAnalysisHtml = `<div class="notice success">🎯 현재 점수만으로도 목표 ${c.targetGrade} 달성 가능 (필요 ${gradeCut(c.targetGrade)}점 / 예상 ${r.expectedScore.toFixed(1)}점)</div>`;
-    } else if (t.state === "impossible") {
-      goalAnalysisHtml = `<div class="notice danger">🎯 목표 ${c.targetGrade} 달성 불가능 (남은 ${r.remainingMark.toFixed(1)}점에서 ${(t.requiredPct*100).toFixed(1)}% 필요)</div>`;
-    } else if (t.state === "need") {
-      const needPoints = round2(gradeCut(c.targetGrade) - r.filledScore);
-      goalAnalysisHtml = `<div class="notice info">🎯 목표 ${c.targetGrade} 달성에는 남은 ${r.remainingMark.toFixed(1)}점에서 <b>${needPoints.toFixed(1)}점 이상 (${(t.requiredPct*100).toFixed(1)}%)</b> 필요</div>`;
+      goalAnalysisHtml = `<div class="notice success">🎯 현재 점수만으로도 목표 ${c.targetGrade} 달성 가능 (컷 ${cut}점 / 예상 ${r.expectedScore.toFixed(1)}점)</div>`;
     } else if (t.state === "missed") {
-      goalAnalysisHtml = `<div class="notice danger">🎯 목표 ${c.targetGrade} 미달 (예상 ${r.expectedScore.toFixed(1)}점 / 컷 ${gradeCut(c.targetGrade)}점)</div>`;
+      goalAnalysisHtml = `<div class="notice danger">🎯 목표 ${c.targetGrade} 미달 (예상 ${r.expectedScore.toFixed(1)}점 / 컷 ${cut}점)</div>`;
+    } else if (t.mode === "exam") {
+      // 시험 빈칸이 남은 경우: 수행은 평균으로 채우고 시험에서 필요한 점수
+      const perfNote = (t.perfFillPct !== null)
+        ? `남은 수행은 현재 수행 평균(${(t.perfFillPct*100).toFixed(0)}%)으로 채운다고 가정할 때, `
+        : `남은 수행을 모두 만점 받는다고 가정해도, `;
+      if (t.state === "impossible") {
+        goalAnalysisHtml = `<div class="notice danger">🎯 목표 ${c.targetGrade}: ${perfNote}<b>지필(시험)에서 ${t.examRemain.toFixed(0)}점 만점 중 ${t.needExamScore.toFixed(1)}점 (${(t.examReq*100).toFixed(0)}%)</b> 필요 → 달성 어려움</div>`;
+      } else {
+        goalAnalysisHtml = `<div class="notice info">🎯 목표 ${c.targetGrade}: ${perfNote}<b>지필(시험)에서 ${t.examRemain.toFixed(0)}점 만점 중 ${Math.max(0,t.needExamScore).toFixed(1)}점 이상 (${(t.examReq*100).toFixed(0)}%)</b> 받으면 됩니다.</div>`;
+      }
+    } else {
+      // 수행만 남은 경우
+      const needPoints = round2(cut - r.filledScore);
+      if (t.state === "impossible") {
+        goalAnalysisHtml = `<div class="notice danger">🎯 목표 ${c.targetGrade} 달성 불가능 (남은 ${r.remainingMark.toFixed(1)}점에서 ${(t.requiredPct*100).toFixed(0)}% 필요)</div>`;
+      } else {
+        goalAnalysisHtml = `<div class="notice info">🎯 목표 ${c.targetGrade}: 남은 수행 ${r.remainingMark.toFixed(1)}점에서 <b>${needPoints.toFixed(1)}점 이상 (${(t.requiredPct*100).toFixed(0)}%)</b> 필요</div>`;
+      }
     }
   }
 
-  return `${metaHtml}${noticesHtml}${fillToggleHtml}${goalAnalysisHtml}${elementsHtml}`;
+  // ── 난이도 기반 기말 예측 (실험적 기능) ──
+  let examForecastHtml = "";
+  const ei = r.examInfo;
+  if (ei) {
+    const diffOptions = Object.keys(DIFFICULTY_LABEL).map(k =>
+      `<option value="${k}" ${(c.examDifficulty||"similar")===k?"selected":""}>${DIFFICULTY_LABEL[k]}</option>`
+    ).join("");
+
+    // 예측 결과 표시 공통
+    const predLine = (ei.predictedFinalScore !== null)
+      ? `<div style="font-size:12px;color:var(--ink-soft);line-height:1.7">
+           ${escapeHtml(ei.basisText)}
+           ${ei.delta!==0 ? `(${ei.delta>0?"+":""}${(ei.delta*100).toFixed(0)}%p)` : ""}
+           → 기말 예상 <b style="color:var(--accent-3)">${ei.predictedFinalScore.toFixed(1)} / ${ei.finMark}점 (${(ei.predictedFinalPct*100).toFixed(0)}%)</b>
+         </div>`
+      : `<div style="font-size:12px;color:var(--ink-mute)">예측에 필요한 기준 점수가 부족합니다.</div>`;
+
+    if (ei.finHas) {
+      // 기말 이미 입력됨 → 예측 불필요
+      examForecastHtml = `
+        <div class="course-body-section exam-forecast">
+          <h4>🧪 기말 예측 (실험적)</h4>
+          <div class="exam-forecast-card">
+            <div style="font-size:12px;color:var(--ink-mute)">기말고사 점수가 이미 입력되어 예측이 필요 없습니다.</div>
+          </div>
+        </div>`;
+    } else if (ei.mode === "mid") {
+      // 중간고사가 있는 과목: 중간 → 기말 난이도
+      const body = ei.midHas ? predLine
+        : `<div style="font-size:12px;color:var(--ink-mute)">중간고사 점수를 입력하면 기말 예상을 보여드립니다.</div>`;
+      examForecastHtml = `
+        <div class="course-body-section exam-forecast">
+          <h4>🧪 난이도 기반 기말 예측 (실험적)</h4>
+          <div class="exam-forecast-card">
+            <div class="exam-diff-row">
+              <span style="font-size:12px;color:var(--ink-soft)">중간 → 기말 난이도 변화</span>
+              <select data-act="meta-difficulty">${diffOptions}</select>
+            </div>
+            ${body}
+          </div>
+        </div>`;
+    } else {
+      // 기말만 있는 과목: 모드 선택 (수행 기준 / 난이도 기준)
+      const fMode = c.examForecastMode || "perf";
+      const baseline = c.forecastBaseline || "perf";
+      const modeTabs = `
+        <div class="forecast-mode-tabs">
+          <button class="fmode-tab ${fMode==='perf'?'active':''}" data-act="meta-fmode" data-val="perf">수행 기준</button>
+          <button class="fmode-tab ${fMode==='difficulty'?'active':''}" data-act="meta-fmode" data-val="difficulty">난이도 기준</button>
+        </div>`;
+
+      let modeBody = "";
+      if (fMode === "perf") {
+        modeBody = `
+          <div style="font-size:11px;color:var(--ink-mute);margin:6px 0">현재 수행평가 평균 득점률로 기말을 예상합니다.</div>
+          ${predLine}`;
+      } else {
+        // 난이도 기준: 기준선 선택 + 난이도
+        const baselineOptions = `
+          <option value="perf" ${baseline==='perf'?'selected':''}>수행평가 평균</option>
+          <option value="manual" ${baseline==='manual'?'selected':''}>직접 입력</option>
+          <option value="global" ${baseline==='global'?'selected':''}>전과목 시험 평균</option>`;
+        const manualInput = baseline === "manual"
+          ? `<div class="exam-diff-row" style="margin-top:6px">
+               <span style="font-size:12px;color:var(--ink-soft)">기준 득점률 (%)</span>
+               <input type="number" class="forecast-manual" data-act="meta-fmanual" min="0" max="100" step="1"
+                 value="${c.forecastManualPct ?? ''}" placeholder="예: 85">
+             </div>`
+          : "";
+        modeBody = `
+          <div class="exam-diff-row" style="margin-top:6px">
+            <span style="font-size:12px;color:var(--ink-soft)">예측 기준선</span>
+            <select data-act="meta-fbaseline">${baselineOptions}</select>
+          </div>
+          ${manualInput}
+          <div class="exam-diff-row" style="margin-top:6px">
+            <span style="font-size:12px;color:var(--ink-soft)">기준 → 기말 난이도</span>
+            <select data-act="meta-difficulty">${diffOptions}</select>
+          </div>
+          ${predLine}`;
+      }
+
+      examForecastHtml = `
+        <div class="course-body-section exam-forecast">
+          <h4>🧪 기말 예측 (실험적) · 중간고사 없음</h4>
+          <div class="exam-forecast-card">
+            ${modeTabs}
+            ${modeBody}
+          </div>
+        </div>`;
+    }
+  }
+
+  return `${metaHtml}${noticesHtml}${fillToggleHtml}${goalAnalysisHtml}${examForecastHtml}${elementsHtml}`;
 }
 
 function renderElementRow(el, c) {
@@ -2284,149 +2858,99 @@ function attachCourseEvents() {
     // 본문 입력 처리
     card.querySelectorAll("[data-act]").forEach(el => {
       const act = el.dataset.act;
-      const isTextLike = el.matches('input[type="number"], input[type="text"]');
-      const evt = el.tagName === "SELECT" ? "change"
-                : (el.tagName === "BUTTON" ? "click"
-                : (el.type === "checkbox" ? "change" : "input"));
-
       if (act === "toggle") return; // 이미 head에서 처리
 
-      el.addEventListener(evt, (e) => {
-        const soft = isTextLike && e.type === "input" && canLiveUpdate(act);
-        handleAct(act, e.target, course, card, { soft });
-      });
-      if (isTextLike) {
-        // 입력 중에는 포커스를 유지하고, blur/change 때만 전체 DOM 동기화
-        el.addEventListener("change", (e) => handleAct(act, e.target, course, card, { soft: false }));
+      const isTextOrNumber = el.tagName === "INPUT" && (el.type === "number" || el.type === "text");
+      const isButton = el.tagName === "BUTTON";
+
+      if (isTextOrNumber) {
+        // 타이핑 중(input): 상태만 갱신 + 헤더/요약 가벼운 부분 업데이트 → 포커스 유지
+        el.addEventListener("input", (e) => {
+          handleAct(act, e.target, course, card, { partial: true });
+        });
+        // blur/엔터(change): 전체 재렌더로 완전 동기화
+        el.addEventListener("change", (e) => {
+          handleAct(act, e.target, course, card, { partial: false });
+        });
+      } else if (isButton) {
+        // 버튼: click → 전체 재렌더
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleAct(act, e.currentTarget, course, card, { partial: false });
+        });
+      } else {
+        // select/checkbox: change 한 번 → 전체 재렌더
+        el.addEventListener("change", (e) => {
+          handleAct(act, e.target, course, card, { partial: false });
+        });
       }
     });
-
-    // 행 단위 이벤트는 above에서 다 잡힘
   });
 }
 
-function canLiveUpdate(act) {
-  // 행 추가/삭제처럼 DOM 구조가 바뀌는 동작은 즉시 전체 render.
-  // 점수/만점/단위수처럼 입력 중 값만 바뀌는 동작은 부분 업데이트로 포커스 유지.
-  return ["meta-name", "meta-group", "meta-credits", "el-name", "el-mark", "el-score", "rep-mark"].includes(act);
-}
-
-let liveDashboardTimer = null;
-function scheduleLiveDashboardRefresh() {
-  clearTimeout(liveDashboardTimer);
-  liveDashboardTimer = setTimeout(() => {
-    renderHero();
-    renderSummary();
-    renderGroups();
-    save();
-  }, 120);
-}
-
-function getCourseHeaderView(c, r) {
-  const gradeText = r.expectedGrade || "—";
-  const gpaText   = r.expectedGPA !== null && r.expectedGPA !== undefined
-                    ? r.expectedGPA.toFixed(2) : "—";
-  const scoreText = c.pf ? (r.pfResult === "pass" ? "Pass" : r.pfResult === "fail" ? "Fail" : "—")
-                         : (r.hasRealScore ? r.expectedScore.toFixed(2) : "—");
-  const flags = [];
-  if (c.pf) flags.push(`<span class="flag pf">P/F</span>`);
-  if (!c.pf && r.baseInfo) flags.push(`<span class="flag basescore">기본점수 ${r.baseInfo.mark}점</span>`);
-  if (!c.pf && (r.remainingMark > 0 || !r.hasRealScore)) flags.push(`<span class="flag empty">빈칸 ${r.remainingMark.toFixed(1)}점</span>`);
-  if (!c.pf && r.hasRealScore) {
-    const d = distanceToNextGrade(r.expectedScore);
-    if (d) {
-      if (d.toUp > 0 && d.toUp <= 2) flags.push(`<span class="flag boundary">${d.upGrade}까지 ${d.toUp.toFixed(1)}점</span>`);
-      else if (d.toDown >= 0 && d.toDown <= 2) flags.push(`<span class="flag boundary">${d.current} 경계</span>`);
-      else flags.push(`<span class="flag safe">${d.current} 안정</span>`);
-    }
-  }
-  if (!c.pf && c.targetGrade) {
-    const t = reverseCourseTarget(c);
-    if (t) {
-      if (t.state === "achieved") flags.push(`<span class="flag goal">🎯 ${c.targetGrade} 달성</span>`);
-      else if (t.state === "impossible") flags.push(`<span class="flag risk">🎯 ${c.targetGrade} 불가</span>`);
-      else if (t.state === "need") flags.push(`<span class="flag goal">🎯 ${c.targetGrade} ${(t.requiredPct*100).toFixed(1)}% 필요</span>`);
-      else if (t.state === "missed") flags.push(`<span class="flag risk">🎯 ${c.targetGrade} 미달</span>`);
-    }
-  }
-  const progressPct = r.sumMark > 0 ? (r.filledMark / r.sumMark * 100) : 0;
-  return { gradeText, gpaText, scoreText, flagsHtml: flags.join(""), progressPct };
-}
-
-function refreshCourseCardLive(card, course) {
-  if (!card || !course) return;
+/* 활성 카드(입력 중)의 헤더/시뮬바만 부분 갱신 — 입력칸/테이블은 건드리지 않음 */
+function updateActiveCardHeader() {
+  const active = document.activeElement;
+  if (!active) return;
+  const card = active.closest(".course-card");
+  if (!card) return;
+  const cid = card.dataset.id;
+  const course = state.courses.find(c => c.id === cid);
+  if (!course) return;
   const r = computeCourse(course);
-  const v = getCourseHeaderView(course, r);
 
-  const name = card.querySelector(".course-name");
-  if (name) {
-    name.innerHTML = `${escapeHtml(course.name)} <span class="course-grouptag">${escapeHtml(course.group)}</span>`;
-  }
-
+  const gradeText = r.expectedGrade || "—";
   const badge = card.querySelector(".course-grade-badge");
   if (badge) {
-    badge.className = `course-grade-badge ${gradeBadgeClass(v.gradeText)}`;
-    badge.textContent = v.gradeText;
+    badge.textContent = gradeText;
+    badge.className = "course-grade-badge " + gradeBadgeClass(gradeText);
   }
-
   const nums = card.querySelectorAll(".course-numbers .n .v");
-  if (nums[0]) nums[0].textContent = v.scoreText;
-  if (nums[1]) nums[1].textContent = course.pf ? "—" : v.gpaText;
-  if (nums[2]) nums[2].textContent = course.credits || 0;
-  if (nums[3]) nums[3].textContent = course.pf ? "—" : r.remainingMark.toFixed(1);
-
-  const progress = card.querySelector(".course-progress > i");
-  if (progress) progress.style.width = `${v.progressPct}%`;
-
-  const flags = card.querySelector(".course-flags");
-  if (flags) flags.innerHTML = v.flagsHtml;
-
-  const simValue = card.querySelector(".sim-bar > span");
-  if (simValue && !course.pf) {
-    simValue.textContent = `최악 ${r.worst.toFixed(1)} · 예상 ${r.expectedScore.toFixed(2)} · 최선 ${r.best.toFixed(1)}`;
+  if (nums.length >= 4) {
+    const scoreText = course.pf
+      ? (r.pfResult === "pass" ? "Pass" : r.pfResult === "fail" ? "Fail" : "—")
+      : (r.hasRealScore ? r.expectedScore.toFixed(2) : "—");
+    const gpaText = (r.expectedGPA !== null && r.expectedGPA !== undefined) ? r.expectedGPA.toFixed(2) : "—";
+    nums[0].textContent = scoreText;
+    nums[1].textContent = course.pf ? "—" : gpaText;
+    nums[2].textContent = course.credits || 0;
+    nums[3].textContent = course.pf ? "—" : r.remainingMark.toFixed(1);
+  }
+  const bar = card.querySelector(".course-progress > i");
+  if (bar) {
+    const pct = r.sumMark > 0 ? (r.filledMark / r.sumMark * 100) : 0;
+    bar.style.width = pct + "%";
+  }
+  const simSpan = card.querySelector(".sim-bar > span:last-child");
+  if (simSpan && !course.pf) {
+    simSpan.textContent = `최악 ${r.worst.toFixed(1)} · 예상 ${r.expectedScore.toFixed(2)} · 최선 ${r.best.toFixed(1)}`;
+  }
+  // 행의 상태 표시(입력됨/빈칸/초과)도 갱신
+  const tr = active.closest("tr[data-eid]");
+  if (tr) {
+    const eid = tr.dataset.eid;
+    const elem = course.elements.find(x => x.id === eid);
+    if (elem) {
+      const m = Number(elem.mark) || 0;
+      const has = elem.score !== null && elem.score !== "" && elem.score !== undefined;
+      const over = has && Number(elem.score) > m;
+      const statusCell = tr.querySelector(".col-status");
+      if (statusCell) {
+        statusCell.innerHTML = has
+          ? (over ? `<span style="color:var(--danger);font-size:11px">초과</span>` : `<span style="color:var(--success);font-size:11px">입력됨</span>`)
+          : `<span style="color:var(--ink-faint);font-size:11px">빈칸</span>`;
+      }
+    }
   }
 }
 
-function refreshElementRowLive(target, course) {
-  const tr = target.closest?.("tr[data-eid]");
-  if (!tr || !course) return;
-  const el = course.elements.find(e => e.id === tr.dataset.eid);
-  if (!el) return;
-
-  const mark = Number(el.mark) || 0;
-  const hasScore = el.score !== null && el.score !== "" && el.score !== undefined;
-  const isOver = hasScore && Number(el.score) > mark;
-
-  const scoreInput = tr.querySelector('input[data-act="el-score"]');
-  if (scoreInput) {
-    scoreInput.classList.toggle("over", !!isOver);
-    scoreInput.classList.toggle("empty", !hasScore);
-  }
-
-  const status = tr.querySelector(".col-status");
-  if (status) {
-    status.innerHTML = hasScore
-      ? (isOver ? `<span style="color:var(--danger);font-size:11px">초과</span>` : `<span style="color:var(--success);font-size:11px">입력됨</span>`)
-      : `<span style="color:var(--ink-faint);font-size:11px">빈칸</span>`;
-  }
-
-  if (el.isExam) {
-    const ratio = tr.querySelector(".exam-ratio");
-    if (ratio) ratio.textContent = `×${(mark/100).toFixed(2)}`;
-
-    const scoreTd = tr.querySelector(".col-score");
-    let converted = tr.querySelector(".exam-converted");
-    if (hasScore) {
-      if (!converted && scoreTd) {
-        converted = document.createElement("div");
-        converted.className = "exam-converted";
-        scoreTd.appendChild(converted);
-      }
-      if (converted) converted.textContent = `→ ${Number(el.score).toFixed(2)}/${mark}점`;
-    } else if (converted) {
-      converted.remove();
-    }
-  }
+/* 디바운스: 입력 도중 상단 hero/요약을 가볍게 따라가도록 */
+let _summaryDebounce = null;
+function scheduleSummaryUpdate() {
+  if (_summaryDebounce) clearTimeout(_summaryDebounce);
+  _summaryDebounce = setTimeout(() => {
+    try { renderHero(); renderSummary(); renderGroups(); } catch (e) {}
+  }, 200);
 }
 
 function handleAct(act, target, course, card, opts = {}) {
@@ -2443,6 +2967,14 @@ function handleAct(act, target, course, card, opts = {}) {
     }
     case "meta-pfresult": course.pfResult = target.value; break;
     case "meta-target": course.targetGrade = target.value; break;
+    case "meta-difficulty": course.examDifficulty = target.value; break;
+    case "meta-fmode": course.examForecastMode = target.dataset.val; break;
+    case "meta-fbaseline": course.forecastBaseline = target.value; break;
+    case "meta-fmanual": {
+      const v = Number(target.value);
+      course.forecastManualPct = (target.value === "" || isNaN(v)) ? null : Math.max(0, Math.min(100, v));
+      break;
+    }
     case "fillempty": course.fillEmpty = target.checked; break;
     case "el-add": {
       course.elements.push({ id: uid(), name: "새 항목", mark: 0, score: null });
@@ -2548,17 +3080,15 @@ function handleAct(act, target, course, card, opts = {}) {
       break;
     }
   }
-  if (opts.soft) {
-    refreshElementRowLive(target, course);
-    refreshCourseCardLive(card, course);
-    scheduleLiveDashboardRefresh();
+  save();
+  if (opts.partial) {
+    // 타이핑 중: 입력 포커스를 유지하기 위해 전체 재렌더 대신 부분 업데이트
+    updateActiveCardHeader();
+    scheduleSummaryUpdate();
   } else {
-    save();
     render();
   }
 }
-
-/* -------- 안전한 HTML 이스케이프 -------- */
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -2727,7 +3257,7 @@ function init() {
   $("#btn-grading").addEventListener("click", openGrading);
   $("#btn-grading-close").addEventListener("click", () => { closeGrading(); render(); });
   $("#btn-grading-default").addEventListener("click", () => {
-    state.grading = structuredClone(DEFAULT_GRADING);
+    state.grading = deepClone(DEFAULT_GRADING);
     save(); renderGradingModal(); render();
     toast("등급표를 기본값으로 복원했어요", "info");
   });
@@ -2783,6 +3313,20 @@ function init() {
     state.courses.forEach(c => state.expanded[c.id] = anyClosed);
     save(); render();
   });
+
+  // 추천 공부 순서: 중간/기말 토글
+  $$(".study-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      state.studyExam = tab.dataset.exam;
+      $$(".study-tab").forEach(t => t.classList.toggle("active", t.dataset.exam === state.studyExam));
+      save();
+      renderStudyOrder();
+    });
+  });
+  // 저장된 탭 상태 복원
+  if (state.studyExam) {
+    $$(".study-tab").forEach(t => t.classList.toggle("active", t.dataset.exam === state.studyExam));
+  }
 
   // 목표 평점 초기값
   $("#goal-gpa").value = state.goalGPA ?? 4.0;
